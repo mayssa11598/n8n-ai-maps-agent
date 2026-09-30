@@ -1,0 +1,418 @@
+{
+  "name": "maps-agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "options": {
+          "systemMessage": "=You are a helpful local business search assistant for Tunisia.\n\nYour job is to help users find restaurants, cafés, shops, hotels, services, and other businesses using the Google Maps Search tool.\n\nIMPORTANT RULES:\n\n1. When the user asks to find a business or place, ALWAYS use the Google Maps Search tool.\n\n2. Understand the user's request and identify:\n\n   * Business type\n   * Specific service or product\n   * Location\n   * Cuisine or category\n   * Preferences such as rating, price, opening status, distance, or transportation method\n   * Whether the user wants results near a specific location\n\n3. There are TWO ways the user can provide a location:\n\n   A. NORMAL TEXT LOCATION\n\n   If the user provides a location such as:\n\n   * Mourouj 6\n   * La Marsa\n   * Ariana\n   * Lac 2 Tunis\n\n   include that location in the Google Maps search query.\n\n   Examples:\n\n   * \"pizza restaurant in Mourouj 6\"\n     → \"pizza restaurants Mourouj 6 Tunisia\"\n\n   * \"café in La Marsa\"\n     → \"cafes La Marsa Tunisia\"\n\n   * \"sushi restaurant in Lac 2\"\n     → \"sushi restaurants Lac 2 Tunis Tunisia\"\n\n   * \"pharmacy in Ariana\"\n     → \"pharmacies Ariana Tunisia\"\n\n   B. GOOGLE MAPS LOCATION\n\n   If the user provides a Google Maps link and the workflow provides\n   latitude and longitude extracted from that link, use those coordinates\n   as the search location.\n\n   Do NOT put the Google Maps URL into the search query.\n\n   Do NOT search for the coordinates as text.\n\n   Instead, use the coordinates with the Google Maps Search tool's\n   geographic location parameter.\n\n   Example:\n\n   User:\n   \"Je cherche un café proche de cette localisation [Google Maps URL]\"\n\n   Extracted location:\n   latitude = 36.8613747\n   longitude = 10.1889085\n\n   Search:\n\n   * q = \"cafes\"\n   * ll = \"@36.8613747,10.1889085,17z\"\n   * nearby = true\n\n4. When latitude and longitude are provided by the workflow, they represent\n   the exact location around which the user wants to search.\n\n5. If the user says:\n\n   * \"à pied\"\n   * \"walking\"\n   * \"marche\"\n   * \"walkable\"\n\n   preserve this requirement.\n\n   Treat it as a request for businesses that can reasonably be reached\n   on foot from the provided location.\n\n   Do not invent walking distances or walking times.\n   Only provide exact walking distance/time if it is available from a\n   tool result.\n\n6. If the user provides a Google Maps URL but latitude and longitude have\n   NOT been successfully extracted, do not invent the location.\n\n   Ask the user to provide the location again or provide a normal place name/address.\n\n7. If the user does not provide any location and a location is necessary\n   for the search, ask the user for their location.\n\n8. The Google Maps search is configured for Tunisia:\n\n   * Country: Tunisia\n   * Country code: tn\n   * Language: French\n\n9. The user may write in:\n\n   * Arabic\n   * Tunisian Arabic\n   * French\n   * English\n\n   Understand the user's language and convert their request into a clear\n   Google Maps search query.\n\n10. When using a normal text location, ALWAYS include Tunisia in the query\n    when appropriate to avoid ambiguous results.\n\n11. When using extracted coordinates, do not add the coordinates to q.\n    Use the coordinates as the geographic search location instead.\n\n12. Do not invent information.\n    Only use information returned by the Google Maps Search tool.\n\n13. After receiving the search results, present the most relevant businesses\n    clearly.\n\nFor each business, provide when available:\n\n* Name\n* Rating\n* Number of reviews\n* Address\n* Phone number\n* Opening status\n* Google Maps link\n\n14. If multiple businesses are returned, provide a useful list of the\n    relevant results.\n\n15. If the search results are poor or unrelated, try a better search query\n    using the information provided by the user.\n\n16. Keep responses concise, clear, and useful.\n\nEXAMPLES:\n\nExample 1 — Normal location:\n\nUser:\n\"I want a pizza restaurant in Mourouj 6\"\n\nAction:\nUse Google Maps Search with:\n\nq = \"pizza restaurants Mourouj 6 Tunisia\"\n\nThen present the relevant results.\n\nExample 2 — Google Maps location:\n\nUser:\n\"Je cherche un café proche de cette localisation [Google Maps URL]\"\n\nWorkflow provides:\n\nlatitude = 36.8613747\nlongitude = 10.1889085\n\nAction:\nUse Google Maps Search with:\n\nq = \"cafes\"\nll = \"@36.8613747,10.1889085,17z\"\nnearby = true\n\nThen present the relevant results.\n\nExample 3 — Google Maps location + walking:\n\nUser:\n\"Je cherche un café proche de cette localisation [Google Maps URL], à pied\"\n\nWorkflow provides:\n\nlatitude = 36.8613747\nlongitude = 10.1889085\n\nAction:\nSearch for cafes around the provided coordinates and preserve the\nuser's walking requirement.\n\nDo not claim an exact walking distance unless the tool provides it.\n\nExample 4 — No location:\n\nUser:\n\"I want a sushi restaurant\"\n\nAction:\nAsk the user which location in Tunisia they want to search.\n\nFINAL RULE:\n\nNever invent a location, coordinate, address, rating, distance, opening\nstatus, phone number, or other business information.\n\nUse the Google Maps Search tool whenever a business search is requested.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        192,
+        -64
+      ],
+      "id": "78214bb3-5907-4856-a055-3e2ea1cbf0af",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "google"
+            },
+            {
+              "name": "q",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', ``, 'string') }}"
+            },
+            {
+              "name": "location",
+              "value": "=Tunisia"
+            },
+            {
+              "name": "google_domain",
+              "value": "google.com"
+            },
+            {
+              "name": "hl",
+              "value": "fr"
+            },
+            {
+              "name": "gl",
+              "value": "tn"
+            },
+            {
+              "name": "api_key",
+              "value": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        464,
+        160
+      ],
+      "id": "5c19ccae-c86b-497e-8438-b26eb927e7b8",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "013f7077-38dc-4bcb-84d4-154fecd037f1",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "https://",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -816,
+        -64
+      ],
+      "id": "53993d4c-3d1c-4929-916a-8a85e576c829",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $('Telegram Trigger').first().json.message.text\n\nconst match = text.match(/https?:\\/\\/[^\\s]+/i);\n\nif (!match) {\n  throw new Error(\"No URL found in the message\");\n}\n\nreturn [\n  {\n    json: {\n      google_maps_url: match[0]\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -592,
+        -208
+      ],
+      "id": "34b066c6-2eb5-44a4-8f02-c767731698de",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.google_maps_url }}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -416,
+        -208
+      ],
+      "id": "3db0d799-752a-4b7c-95c1-7344c5a468e8",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\n// Convert the entire response to text so we don't care\n// which field n8n put the HTML in.\nconst text = JSON.stringify(item);\n\n// Decode escaped/encoded Google Maps content\nconst decoded = text\n  .replace(/\\\\u0026/g, '&')\n  .replace(/\\\\u003d/g, '=')\n  .replace(/\\\\u0021/g, '!')\n  .replace(/\\\\\\\\/g, '\\\\');\n\n// Pattern 1: Google Maps @latitude,longitude\nlet match = decoded.match(/@(-?\\d{1,3}\\.\\d+),(-?\\d{1,3}\\.\\d+)/);\n\n// Pattern 2: Google internal !3dLAT !4dLNG\nif (!match) {\n  match = decoded.match(/!3d(-?\\d{1,3}\\.\\d+).*?!4d(-?\\d{1,3}\\.\\d+)/);\n}\n\n// Pattern 3: URL-encoded !3dLAT %21 ... !4dLNG\nif (!match) {\n  match = decoded.match(/!3d(-?\\d{1,3}\\.\\d+).*?%21.*?!4d(-?\\d{1,3}\\.\\d+)/);\n}\n\n// Pattern 4: encoded %213dLAT ... %214dLNG\nif (!match) {\n  match = decoded.match(/%213d(-?\\d{1,3}\\.\\d+).*?%214d(-?\\d{1,3}\\.\\d+)/);\n}\n\nif (!match) {\n  throw new Error(\n    \"Coordinates not found. Response starts with: \" +\n    decoded.substring(0, 1000)\n  );\n}\n\nreturn [\n  {\n    json: {\n      latitude: Number(match[1]),\n      longitude: Number(match[2])\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        -208
+      ],
+      "id": "bd5cdb79-6cc1-48cd-88cf-0c9acec4ebed",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "72e737bd-20ec-41dc-8ddc-09f338241adc",
+              "name": "prompt",
+              "value": "={{ $('Telegram Trigger').item.json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -336,
+        64
+      ],
+      "id": "516123ef-3d4d-4450-8003-012778b67abe",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c880e332-5e09-4636-8b67-7c3e98aad737",
+              "name": "prompt",
+              "value": "={{ $('Telegram Trigger').item.json.message.text }}\nlatitude: {{ $json.latitude }}\nlongitude: {{ $json.longitude }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -64,
+        -208
+      ],
+      "id": "a3a290fb-27ee-46cb-8f84-8876b0bc985b",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -992,
+        -64
+      ],
+      "id": "35d6bfcb-6af5-49ee-95d6-77b500ac78df",
+      "name": "Telegram Trigger",
+      "webhookId": "",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        -64
+      ],
+      "id": "2fbdffb1-6dd9-4474-a42e-2f1e23bea5c8",
+      "name": "Send a text message",
+      "webhookId": "",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        256,
+        144
+      ],
+      "id": "51e34d15-41cc-4aa5-94e0-1474b84f8da5",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-pro-preview",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        144
+      ],
+      "id": "4c9ee780-6f64-41ca-bb20-82f46f339c1d",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "10275cd1-789a-4fc6-961c-555c8cdd0df2",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": ""
+  },
+  "nodeGroups": [],
+  "id": "ufBwbQaizoVw8lha",
+  "tags": []
+}
