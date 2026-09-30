@@ -38,7 +38,7 @@ It helps users find restaurants, cafés, shops, hotels, and other businesses in 
 3. Add your Google Gemini API key.
 4. Add your SerpApi API key.
 5. Activate the workflow.
-6. 
+
 ## 📂 Structure
 
 ```text
